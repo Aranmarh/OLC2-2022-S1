@@ -1,0 +1,84 @@
+------------------------------------------------------------------------------
+Analizador léxico, agregar este código en el archivo Lexico para prueba
+------------------------------------------------------------------------------
+
+package analizadores;
+import java_cup.runtime.Symbol; 
+
+%% 
+%class Lexico
+%public 
+%line 
+%char 
+%cup 
+%unicode
+%ignorecase
+
+%init{ 
+    yyline = 1; 
+    yychar = 1; 
+%init} 
+UNO = 1
+CERO = 0
+BLANCOS=[ \r\t]+
+
+
+%%
+
+
+\n {yychar=1;}
+
+{BLANCOS} {} 
+{ENTEROS} {return new Symbol(sym.NUM,yyline,yychar, yytext());}
+
+. {
+    System.out.println("Este es un error lexico: "+yytext()+
+    ", en la linea: "+yyline+", en la columna: "+yychar);
+}
+
+------------------------------------------------------------------------------
+Analizador Sintáctico, agregar este código en el archivo Sintactico para prueba
+------------------------------------------------------------------------------
+
+package analizadores; 
+import java_cup.runtime.*;
+
+parser code 
+{:
+    int contadorC=0;
+    int contadorU=0;
+    /**
+     * Método al que se llama automáticamente ante algún error sintactico.
+     **/ 
+    public void syntax_error(Symbol s){ 
+        System.out.println("Error Sintáctico en la Línea " + (s.left) +
+        " Columna "+s.right+ ". No se esperaba este componente: " +s.value+"."); 
+    } 
+
+    /**
+     * Método al que se llama automáticamente ante algún error sintáctico 
+     * en el que ya no es posible una recuperación de errores.
+     **/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        System.out.println("Error síntactico irrecuperable en la Línea " + 
+        (s.left)+ " Columna "+s.right+". Componente " + s.value + 
+        " no reconocido."); 
+    }  
+
+    public void write(String out) {
+        System.out.print(out);
+    }
+:} 
+
+
+start with S; 
+
+S::=E   {: System.out.println("la cantidad de unos es de "+contadorU+" la cantidad de unos es de "+contadorC) :}
+;
+
+E ::= 
+   CERO E         {: contadorC++; :}
+ | UNO  E          {: contadorU++; :}
+ | CERO         {:contadorC++;:}
+ | UNO          {: contadorU++;; :}
+;
